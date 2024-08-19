@@ -34,7 +34,6 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         bfs_mode = self.bfs_chk.isChecked()
         token_input = self.Token_in.text()
 
-        # 如果 token_input 為空，則使用從 token.txt 中讀取的 token
         token = token_input if token_input else self.token
 
         if not token:
@@ -49,8 +48,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             update=update_mode,
             bfs=bfs_mode,
             token=token,
-            quiet=False,
-            debug=False
+            quiet=False
         )
 
         args = mxlrc.init_args(args)
