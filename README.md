@@ -11,6 +11,7 @@ Based on commit [601c234](https://github.com/fashni/MxLRC/commit/601c23437b657d4
 ## Requirements
 - Python 3.9+
 - pyqt5
+- tinytag
  
 ## LICENSE
 [The MIT License](LICENSE)
