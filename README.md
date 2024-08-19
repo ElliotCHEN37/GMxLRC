@@ -12,7 +12,12 @@ Based on commit [601c234](https://github.com/fashni/MxLRC/commit/601c23437b657d4
 - Python 3.9+
 - pyqt5
 - tinytag
- 
+
+## Build
+1. clone this repo
+2. cd to folder
+3. run `pyinstaller build.spec` in terminal
+
 ## LICENSE
 [The MIT License](LICENSE)
 
