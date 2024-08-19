@@ -1,21 +1,27 @@
 import subprocess
+import webbrowser
 import sys
 import os
 from PyQt5 import QtWidgets, QtGui
+from mutagen import File
 from win import Ui_MainWindow
 
 class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        version = 'gui'
+        version = 'std'
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(':/ico/icon.png'))
         self.pushButton.clicked.connect(self.start_process)
 
+        self.actionExit.triggered.connect(self.close)
+        self.actionOpen_Folder_2.triggered.connect(self.open_folder)
+        self.actionOpen_File.triggered.connect(self.open_file)
+        self.actionAbout.triggered.connect(self.show_about)
+        self.actionUpdate.triggered.connect(self.check_for_update)
+
         if version == 'gui':
             self.check_mxlrc_existence()
-        else:
-            pass
 
         self.token = ""
         token_file_path = "token.txt"
@@ -88,6 +94,39 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         except Exception as e:
             self.info.append(f"[DEBUG] Args: {args_list}")
             self.info.append(f"Error occurred: {e}")
+
+    def open_folder(self):
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
+        if folder_path:
+            self.info.append(f"Selected Folder: {folder_path}")
+
+    def open_file(self):
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
+        if file_path:
+            self.info.append(f"Selected File: {file_path}")
+            self.load_metadata(file_path)
+
+    def load_metadata(self, file_path):
+        self.info.setText("")
+        try:
+            audio_file = File(file_path)
+            if audio_file:
+                artist = audio_file.get('ARTIST', [''])[0]
+                title = audio_file.get('TITLE', [''])[0]
+                self.Artist_in.setText(artist)
+                self.Title_in.setText(title)
+                self.info.append(f"Loaded metadata - Artist: {artist}, Title: {title}")
+            else:
+                self.info.append("No metadata found in the file.")
+        except Exception as e:
+            self.info.append(f"Failed to load metadata: {e}")
+
+    def show_about(self):
+        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.2 by ElliotCHEN37\nMxLRC v1.2.2 by fashni\n"
+                                                   "Licensed under MIT License")
+
+    def check_for_update(self):
+        webbrowser.open('https://github.com/ElliotCHEN37/GMxLRC/releases/latest')
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
