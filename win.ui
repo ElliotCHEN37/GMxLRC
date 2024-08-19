@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>631</width>
-    <height>673</height>
+    <width>806</width>
+    <height>662</height>
    </rect>
   </property>
   <property name="font">
@@ -105,7 +105,7 @@
     <item row="3" column="1" colspan="2">
      <widget class="QLineEdit" name="Sleep_in">
       <property name="placeholderText">
-       <string>Sleep time (s), default: 30</string>
+       <string>Sleep time between requests, default: 30 (second)</string>
       </property>
      </widget>
     </item>
@@ -125,7 +125,7 @@
     <item row="4" column="1" colspan="2">
      <widget class="QLineEdit" name="Depth_in">
       <property name="placeholderText">
-       <string>Max recursion depth, default: 100</string>
+       <string>Max recursion depth, default: 100 (Only Effect Directory Mode, Go to Action -&gt; Open Folder)</string>
       </property>
      </widget>
     </item>
@@ -148,30 +148,14 @@
     <item row="6" column="0" colspan="3">
      <widget class="QLabel" name="Update_des">
       <property name="text">
-       <string>ⓘ This will overwrite existing .lrc files</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0" colspan="2">
-     <widget class="QCheckBox" name="bfs_chk">
-      <property name="font">
-       <font>
-        <family>Arial</family>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="accessibleDescription">
-       <string/>
-      </property>
-      <property name="text">
-       <string>--bfs</string>
+       <string>ⓘ This will overwrite existing .lrc files (Only Effect Directory Mode, Go to Action -&gt; Open Folder)</string>
       </property>
      </widget>
     </item>
     <item row="8" column="0" colspan="3">
      <widget class="QLabel" name="bfs_des">
       <property name="text">
-       <string>ⓘ use breadth first search for scanning directory</string>
+       <string>ⓘ use breadth first search for scanning directory (Only Effect Directory Mode, Go to Action -&gt; Open Folder)</string>
       </property>
      </widget>
     </item>
@@ -194,7 +178,7 @@
     <item row="10" column="0" colspan="3">
      <widget class="QLabel" name="Quiet_des">
       <property name="text">
-       <string>ⓘ This will hide console output</string>
+       <string>ⓘ This will hide console output and debug information (Only Effect Directory Mode, Go to Action -&gt; Open Folder)</string>
       </property>
      </widget>
     </item>
@@ -258,6 +242,22 @@ p, li { white-space: pre-wrap; }
       </property>
      </widget>
     </item>
+    <item row="7" column="0" colspan="3">
+     <widget class="QCheckBox" name="bfs_chk">
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="accessibleDescription">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Breadth-first Search</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -265,7 +265,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>631</width>
+     <width>806</width>
      <height>23</height>
     </rect>
    </property>
