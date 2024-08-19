@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(631, 524)
+        MainWindow.resize(631, 583)
         font = QtGui.QFont()
         font.setFamily("Arial")
         MainWindow.setFont(font)
@@ -50,7 +50,7 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.Output_lab.setFont(font)
         self.Output_lab.setObjectName("Output_lab")
-        self.gridLayout.addWidget(self.Output_lab, 2, 0, 1, 2)
+        self.gridLayout.addWidget(self.Output_lab, 2, 0, 1, 1)
         self.Output_in = QtWidgets.QLineEdit(self.centralwidget)
         self.Output_in.setObjectName("Output_in")
         self.gridLayout.addWidget(self.Output_in, 2, 2, 1, 1)
@@ -92,28 +92,39 @@ class Ui_MainWindow(object):
         self.bfs_chk.setFont(font)
         self.bfs_chk.setAccessibleDescription("")
         self.bfs_chk.setObjectName("bfs_chk")
-        self.gridLayout.addWidget(self.bfs_chk, 7, 0, 1, 3)
+        self.gridLayout.addWidget(self.bfs_chk, 7, 0, 1, 2)
         self.bfs_des = QtWidgets.QLabel(self.centralwidget)
         self.bfs_des.setObjectName("bfs_des")
         self.gridLayout.addWidget(self.bfs_des, 8, 0, 1, 3)
+        self.Quiet_chk = QtWidgets.QCheckBox(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(12)
+        self.Quiet_chk.setFont(font)
+        self.Quiet_chk.setAccessibleDescription("")
+        self.Quiet_chk.setObjectName("Quiet_chk")
+        self.gridLayout.addWidget(self.Quiet_chk, 9, 0, 1, 3)
+        self.Quiet_des = QtWidgets.QLabel(self.centralwidget)
+        self.Quiet_des.setObjectName("Quiet_des")
+        self.gridLayout.addWidget(self.Quiet_des, 10, 0, 1, 3)
         self.Token_lab = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(12)
         self.Token_lab.setFont(font)
         self.Token_lab.setObjectName("Token_lab")
-        self.gridLayout.addWidget(self.Token_lab, 9, 0, 1, 1)
+        self.gridLayout.addWidget(self.Token_lab, 11, 0, 1, 1)
         self.Token_in = QtWidgets.QLineEdit(self.centralwidget)
         self.Token_in.setObjectName("Token_in")
-        self.gridLayout.addWidget(self.Token_in, 9, 1, 1, 2)
+        self.gridLayout.addWidget(self.Token_in, 11, 1, 1, 2)
         self.info = QtWidgets.QTextEdit(self.centralwidget)
         self.info.setEnabled(True)
         self.info.setReadOnly(True)
         self.info.setObjectName("info")
-        self.gridLayout.addWidget(self.info, 10, 0, 1, 3)
+        self.gridLayout.addWidget(self.info, 12, 0, 1, 3)
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
-        self.gridLayout.addWidget(self.pushButton, 11, 0, 1, 3)
+        self.gridLayout.addWidget(self.pushButton, 13, 0, 1, 3)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -137,17 +148,22 @@ class Ui_MainWindow(object):
         self.Update_des.setText(_translate("MainWindow", "ⓘ This will overwrite existing .lrc files"))
         self.bfs_chk.setText(_translate("MainWindow", "--bfs"))
         self.bfs_des.setText(_translate("MainWindow", "ⓘ use breadth first search for scanning directory"))
+        self.Quiet_chk.setText(_translate("MainWindow", "Quiet Mode"))
+        self.Quiet_des.setText(_translate("MainWindow", "ⓘ This will hide console output"))
         self.Token_lab.setText(_translate("MainWindow", "Token:"))
         self.Token_in.setPlaceholderText(_translate("MainWindow", "Musximatch User Token"))
         self.info.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Arial\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">GMxLRC v1.1 by ElliotCHEN37</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">GMxLRC v1.2 by ElliotCHEN37</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">MxLRC by fashni</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Licensed under MIT License</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Changelog:</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">1.2</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">-Fix arguments aren\'t added correctly</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">-Some fixes and improvements</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">1.1</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">-Responsive window</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">1.0</p>\n"
