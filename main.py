@@ -6,10 +6,10 @@ from PyQt5 import QtWidgets, QtGui
 from mutagen import File
 from win import Ui_MainWindow
 
+
 class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        version = 'std'
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(':/ico/icon.png'))
         self.pushButton.clicked.connect(self.start_process)
@@ -20,31 +20,28 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionAbout.triggered.connect(self.show_about)
         self.actionUpdate.triggered.connect(self.check_for_update)
 
-        if version == 'gui':
-            self.check_mxlrc_existence()
+        if not os.path.exists('./mxlrc.exe'):
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Warning)
+            msg.setWindowTitle("Missing File")
+            msg.setText("The required file 'mxlrc.exe' is not found in the current directory.")
+            msg.setInformativeText(
+                "Please download 'mxlrc.exe' and place it in the same directory as this application.")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msg.exec_()
+            sys.exit()
 
         self.token = ""
-        token_file_path = "token.txt"
 
-        if os.path.exists(token_file_path):
+        if os.path.exists("token.txt"):
             try:
-                with open(token_file_path, "r") as token_file:
+                with open("token.txt", "r") as token_file:
                     self.token = token_file.read().strip()
             except Exception as e:
                 print(f"Error reading token file: {e}")
 
         self.Token_in.setText(self.token)
 
-    def check_mxlrc_existence(self):
-        if not os.path.exists('./mxlrc.exe'):
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Warning)
-            msg.setWindowTitle("Missing File")
-            msg.setText("The required file 'mxlrc.exe' is not found in the current directory.")
-            msg.setInformativeText("Please download 'mxlrc.exe' and place it in the same directory as this application.")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msg.exec_()
-            sys.exit()
 
     def start_process(self):
         self.info.setText("")
@@ -61,6 +58,9 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.info.append("Token is empty. No action performed.")
             return
 
+        self.download_lrc(artist, title, output_dir, sleep_time, max_depth, token)
+
+    def download_lrc(self, artist, title, output_dir, sleep_time, max_depth, token):
         args_list = [
             'mxlrc.exe',
             '-s', f"{artist},{title}",
@@ -88,9 +88,9 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.info.append(stderr)
 
             if process.returncode == 0:
-                self.info.append("Process completed successfully.")
+                self.info.append(f"Downloaded LRC for {artist} - {title}")
             else:
-                self.info.append(f"Process failed with exit code {process.returncode}.")
+                self.info.append(f"Failed to download LRC for {artist} - {title} with exit code {process.returncode}.")
         except Exception as e:
             self.info.append(f"[DEBUG] Args: {args_list}")
             self.info.append(f"Error occurred: {e}")
@@ -99,9 +99,39 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
         if folder_path:
             self.info.append(f"Selected Folder: {folder_path}")
+            self.batch_process_folder(folder_path)
+
+    def batch_process_folder(self, folder_path):
+        supported_formats = ('.mp3', '.flac', '.wav', '.ogg', '.m4a')
+        audio_files = [f for f in os.listdir(folder_path) if f.lower().endswith(supported_formats)]
+
+        if not audio_files:
+            self.info.append("No audio files found in the selected folder.")
+            return
+
+        output_dir = self.Output_in.text()
+        sleep_time = int(self.Sleep_in.text()) if self.Sleep_in.text() else 30
+        max_depth = int(self.Depth_in.text()) if self.Depth_in.text() else 100
+        token = self.Token_in.text() or self.token
+
+        if not token:
+            self.info.append("Token is empty. No action performed.")
+            return
+
+        for audio_file in audio_files:
+            file_path = os.path.join(folder_path, audio_file)
+            try:
+                audio = File(file_path)
+                artist = audio.get('ARTIST', ['Unknown Artist'])[0]
+                title = audio.get('TITLE', [os.path.splitext(audio_file)[0]])[0]
+                self.info.append(f"Processing file: {audio_file} (Artist: {artist}, Title: {title})")
+                self.download_lrc(artist, title, output_dir, sleep_time, max_depth, token)
+            except Exception as e:
+                self.info.append(f"Failed to process file {audio_file}: {e}")
 
     def open_file(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "",
+                                                             "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
         if file_path:
             self.info.append(f"Selected File: {file_path}")
             self.load_metadata(file_path)
@@ -128,11 +158,13 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def check_for_update(self):
         webbrowser.open('https://github.com/ElliotCHEN37/GMxLRC/releases/latest')
 
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainApp()
     main_window.show()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()
