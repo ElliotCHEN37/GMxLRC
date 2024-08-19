@@ -6,6 +6,7 @@ from PyQt5 import QtWidgets, QtGui
 from mutagen import File
 from win import Ui_MainWindow
 
+
 class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -41,7 +42,6 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 print(f"Error reading token file: {e}")
 
         self.Token_in.setText(self.token)
-
 
     def start_process(self):
         self.info.setText("")
