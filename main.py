@@ -1,9 +1,8 @@
-import argparse
+import subprocess
 import sys
 import os
 from PyQt5 import QtWidgets, QtGui
 from win import Ui_MainWindow
-import mxlrc
 
 class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -25,52 +24,44 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.Token_in.setText(self.token)
 
     def start_process(self):
+        self.info.setText("")
         artist = self.Artist_in.text()
         title = self.Title_in.text()
         output_dir = self.Output_in.text()
         sleep_time = int(self.Sleep_in.text()) if self.Sleep_in.text() else 30
         max_depth = int(self.Depth_in.text()) if self.Depth_in.text() else 100
-        update_mode = self.Update_chk.isChecked()
-        bfs_mode = self.bfs_chk.isChecked()
         token_input = self.Token_in.text()
 
         token = token_input if token_input else self.token
 
         if not token:
-            self.info.setText("Token is empty. No action performed.")
+            self.info.append("Token is empty. No action performed.")
             return
 
-        args = argparse.Namespace(
-            song=[f"{artist},{title}"],
-            outdir=output_dir,
-            sleep=sleep_time,
-            depth=max_depth,
-            update=update_mode,
-            bfs=bfs_mode,
-            token=token,
-            quiet=False
-        )
+        args_list = [
+            'mxlrc.exe',
+            '-s', f"{artist},{title}",
+            '-o', output_dir,
+            '-t', str(sleep_time),
+            '-d', str(max_depth),
+            '--token', token
+        ]
 
-        args = mxlrc.init_args(args)
+        if self.Quiet_chk.isChecked():
+            args_list.append('-q')
+        if self.Update_chk.isChecked():
+            args_list.append('-u')
+        if self.bfs_chk.isChecked():
+            args_list.append('--bfs')
 
-        song = mxlrc.Song(artist, title)
-        musixmatch = mxlrc.Musixmatch(token=token)
+        try:
+            subprocess.run(args_list, check=True)
+            self.info.append(f"[DEBUG] Args: {args_list}")
+            self.info.append(f"Process completed successfully.")
+        except subprocess.CalledProcessError as e:
+            self.info.append(f"[DEBUG] Args: {args_list}")
+            self.info.append(f"Error occurred: {e}")
 
-        body = musixmatch.find_lyrics(song)
-        if not body:
-            self.info.setText("Lyrics not found or an error occurred.")
-            return
-
-        song.update_info(body)
-
-        if not mxlrc.Musixmatch.get_synced(song, body):
-            mxlrc.Musixmatch.get_unsynced(song, body)
-
-        success = mxlrc.Musixmatch.gen_lrc(song, outdir=args.outdir)
-        if success:
-            self.info.setText(f"LRC file generated successfully in {args.outdir}\nDone")
-        else:
-            self.info.setText("Failed to generate LRC file.")
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
