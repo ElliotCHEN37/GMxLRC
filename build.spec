@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('win.py', '.'), ('resource_rc.py', '.'), ('mxlrc.py', '.')],
+    datas=[('win.py', '.'), ('resource_rc.py', '.'), ('mxlrc.exe', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

@@ -55,13 +55,22 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             args_list.append('--bfs')
 
         try:
-            subprocess.run(args_list, check=True)
+            process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            stdout, stderr = process.communicate()
+
             self.info.append(f"[DEBUG] Args: {args_list}")
-            self.info.append(f"Process completed successfully.")
-        except subprocess.CalledProcessError as e:
+            if stdout:
+                self.info.append(stdout)
+            if stderr:
+                self.info.append(stderr)
+
+            if process.returncode == 0:
+                self.info.append("Process completed successfully.")
+            else:
+                self.info.append(f"Process failed with exit code {process.returncode}.")
+        except Exception as e:
             self.info.append(f"[DEBUG] Args: {args_list}")
             self.info.append(f"Error occurred: {e}")
-
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

@@ -1,7 +1,7 @@
 # GMxLRC
 <img src="icon.png" height="128"><br>
 A simple GUI for MxLRC<br>
-Based on commit [601c234](https://github.com/fashni/MxLRC/commit/601c23437b657d48c2eba93d563d61a22671ff47)
+Based on v1.2.2
 
 ## Additional Feature
 - Auto-read token from file
@@ -11,7 +11,6 @@ Based on commit [601c234](https://github.com/fashni/MxLRC/commit/601c23437b657d4
 ## Requirements
 - Python 3.9+
 - pyqt5
-- tinytag
 
 ## Build
 1. clone this repo
