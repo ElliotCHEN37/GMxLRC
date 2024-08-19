@@ -18,7 +18,7 @@ VSVersionInfo(
         StringStruct(u'FileDescription', u'GMxLRC'),
         StringStruct(u'FileVersion', u'1.0'),
         StringStruct(u'InternalName', u'gmxlrc'),
-        StringStruct(u'LegalCopyright', u'\xa9 ElliotCHEN37 2024'),
+        StringStruct(u'LegalCopyright', u'\xa9 ElliotCHEN37 2024 and \xa9 fashni 2022'),
         StringStruct(u'OriginalFilename', u'GMxLRC_Windows_x64.exe'),
         StringStruct(u'ProductName', u'GMxLRC'),
         StringStruct(u'ProductVersion', u'1.0')])
