@@ -7,9 +7,15 @@ from win import Ui_MainWindow
 class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        version = 'gui'
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(':/ico/icon.png'))
         self.pushButton.clicked.connect(self.start_process)
+
+        if version == 'gui':
+            self.check_mxlrc_existence()
+        else:
+            pass
 
         self.token = ""
         token_file_path = "token.txt"
@@ -22,6 +28,17 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 print(f"Error reading token file: {e}")
 
         self.Token_in.setText(self.token)
+
+    def check_mxlrc_existence(self):
+        if not os.path.exists('./mxlrc.exe'):
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Warning)
+            msg.setWindowTitle("Missing File")
+            msg.setText("The required file 'mxlrc.exe' is not found in the current directory.")
+            msg.setInformativeText("Please download 'mxlrc.exe' and place it in the same directory as this application.")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msg.exec_()
+            sys.exit()
 
     def start_process(self):
         self.info.setText("")

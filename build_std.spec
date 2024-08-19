@@ -21,7 +21,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='GMxLRC_Windows_x64.exe',
+    name='GMxLRC_STD_Windows_x64.exe',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -35,5 +35,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['icon.png'],
-	version='version.rc',
+	version='version_std.rc',
 )
