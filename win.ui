@@ -336,7 +336,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionBd">
    <property name="text">
-    <string>Batch Download</string>
+    <string>Open Song List</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>

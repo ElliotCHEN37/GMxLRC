@@ -64,10 +64,10 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.info.append("Token is empty. No action performed.")
             return
 
-        search_string = (f'"{artist_input},{title_input}"')
+        search_string = f'"{artist_input},{title_input}"'
         self.download_lrc(search_string, output_dir, sleep_time, max_depth, token)
 
-    def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token):
+    def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token, directory_mode=False):
         args_list = [
             'mxlrc.exe', '-s', search_string, '-o', output_dir,
             '-t', str(sleep_time), '-d', str(max_depth), '--token', token
@@ -79,6 +79,8 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             args_list.append('-u')
         if self.bfs_chk.isChecked():
             args_list.append('--bfs')
+        if directory_mode:
+            args_list.append('--directory')
 
         try:
             process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
@@ -106,13 +108,6 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
         if folder_path:
             self.info.append(f"Selected Folder: {folder_path}")
-            audio_files = [f for f in os.listdir(folder_path) if
-                           f.lower().endswith(('.mp3', '.flac', '.wav', '.ogg', '.m4a'))]
-
-            if not audio_files:
-                self.info.append("No audio files found in the selected folder.")
-                return
-
             output_dir = self.Output_in.text().strip()
             sleep_time = int(self.Sleep_in.text() or 30)
             max_depth = int(self.Depth_in.text() or 100)
@@ -122,9 +117,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.info.append("Token is empty. No action performed.")
                 return
 
-            for audio_file in audio_files:
-                file_path = os.path.join(folder_path, audio_file)
-                self.process_audio_file(file_path, output_dir, sleep_time, max_depth, token)
+            self.download_lrc(folder_path, output_dir, sleep_time, max_depth, token, directory_mode=True)
 
     def process_audio_file(self, file_path, output_dir, sleep_time, max_depth, token):
         try:
@@ -152,9 +145,9 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.info.append(f"Failed to load metadata: {e}")
 
     def open_batch_file(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Batch File", "", "Text Files (*.txt)")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Song List", "", "Text Files (*.txt)")
         if file_path:
-            self.info.append(f"Selected Batch File: {file_path}")
+            self.info.append(f"Selected Song List: {file_path}")
             try:
                 with open(file_path, "r", encoding="utf-8") as batch_file:
                     lines = batch_file.readlines()
@@ -170,9 +163,9 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     for line in lines:
                         artist, title = [s.strip() for s in line.split(',')]
                         self.download_lrc(f'"{artist},{title}"', output_dir, sleep_time, max_depth, token)
-                        self.info.append(f"Processing batch item: {artist} - {title}")
+                        self.info.append(f"Processing: {artist} - {title}")
             except Exception as e:
-                self.info.append(f"Failed to process batch file: {e}")
+                self.info.append(f"Failed to process: {e}")
 
     def show_about(self):
         QtWidgets.QMessageBox.about(self, "About",

@@ -214,7 +214,7 @@ class Ui_MainWindow(object):
         self.actionAbout.setShortcut(_translate("MainWindow", "Alt+A"))
         self.actionUpdate.setText(_translate("MainWindow", "Check for Update"))
         self.actionUpdate.setShortcut(_translate("MainWindow", "Ctrl+U"))
-        self.actionBd.setText(_translate("MainWindow", "Batch Download"))
+        self.actionBd.setText(_translate("MainWindow", "Open Song List"))
         self.actionBd.setShortcut(_translate("MainWindow", "Ctrl+L"))
         self.actionLicense.setText(_translate("MainWindow", "License"))
         self.actionLicense.setShortcut(_translate("MainWindow", "Alt+L"))
