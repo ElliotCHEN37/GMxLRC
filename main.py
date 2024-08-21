@@ -1,8 +1,7 @@
-import subprocess
 import webbrowser
 import sys
 import os
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from mutagen import File
 from win import Ui_MainWindow
 
@@ -29,8 +28,12 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.check_executable()
 
         self.token = self.load_token()
-
         self.Token_in.setText(self.token)
+
+        self.process = QtCore.QProcess(self)
+        self.process.readyReadStandardOutput.connect(self.handle_stdout)
+        self.process.readyReadStandardError.connect(self.handle_stderr)
+        self.process.finished.connect(self.process_finished)
 
     def check_executable(self):
         if not os.path.exists('mxlrc.exe'):
@@ -69,9 +72,14 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token, directory_mode=False):
         args_list = [
-            'mxlrc.exe', '-s', search_string, '-o', output_dir,
-            '-t', str(sleep_time), '-d', str(max_depth), '--token', token
+            '-s', search_string, '--token', token
         ]
+
+        if directory_mode:
+            args_list = ['-s', search_string, '-t', str(sleep_time), '-d', str(max_depth), '--token', token]
+        else:
+            args_list.append('-o')
+            args_list.append(output_dir)
 
         if self.Quiet_chk.isChecked():
             args_list.append('-q')
@@ -79,16 +87,22 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             args_list.append('-u')
         if self.bfs_chk.isChecked():
             args_list.append('--bfs')
-        if directory_mode:
-            args_list.append('--directory')
 
-        try:
-            process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-                                       encoding="utf-8")
-            self.handle_process_output(process)
-        except Exception as e:
-            if not self.Quiet_chk.isChecked():
-                self.info.append(f"[D] Error occurred: {e}")
+        self.info.append(f"[D] Arguments: {str(args_list)}")
+
+        self.process.start('mxlrc.exe', args_list)
+
+    def handle_stdout(self):
+        output = self.process.readAllStandardOutput().data().decode()
+        self.info.append(f"[I] {output.strip()}")
+
+    def handle_stderr(self):
+        error = self.process.readAllStandardError().data().decode()
+        self.info.append(f"[E] {error.strip()}")
+
+    def process_finished(self):
+        if self.process.exitCode() != 0 and not self.Quiet_chk.isChecked():
+            self.info.append(f"[X] Failed to process with exit code {self.process.exitCode()}.")
 
     def handle_process_output(self, process):
         for stdout_line in iter(process.stdout.readline, ''):
@@ -108,16 +122,18 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
         if folder_path:
             self.info.append(f"Selected Folder: {folder_path}")
-            output_dir = self.Output_in.text().strip()
-            sleep_time = int(self.Sleep_in.text() or 30)
-            max_depth = int(self.Depth_in.text() or 100)
+
+            sleep_time = int(self.Sleep_in.text())
+            max_depth = int(self.Depth_in.text())
             token = self.Token_in.text().strip() or self.token
 
             if not token:
                 self.info.append("Token is empty. No action performed.")
                 return
 
-            self.download_lrc(folder_path, output_dir, sleep_time, max_depth, token, directory_mode=True)
+            search_string = folder_path
+
+            self.download_lrc(search_string, "", sleep_time, max_depth, token, directory_mode=True)
 
     def process_audio_file(self, file_path, output_dir, sleep_time, max_depth, token):
         try:

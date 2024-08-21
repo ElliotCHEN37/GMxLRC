@@ -190,7 +190,7 @@ class Ui_MainWindow(object):
         self.bfs_chk.setText(_translate("MainWindow", "Breadth-first Search"))
         self.bfs_des.setText(_translate("MainWindow", "ⓘ use breadth first search for scanning directory (Only Effect Directory Mode)"))
         self.Quiet_chk.setText(_translate("MainWindow", "Quiet Mode"))
-        self.Quiet_des.setText(_translate("MainWindow", "ⓘ This will hide console output and debug information (Only Effect Directory Mode)"))
+        self.Quiet_des.setText(_translate("MainWindow", "ⓘ This will hide console output and debug information"))
         self.Token_lab.setText(_translate("MainWindow", "*Token:"))
         self.Token_in.setPlaceholderText(_translate("MainWindow", "Musximatch User Token"))
         self.info.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
@@ -206,7 +206,7 @@ class Ui_MainWindow(object):
         self.menuAbout.setTitle(_translate("MainWindow", "Help"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionExit.setShortcut(_translate("MainWindow", "Alt+F4"))
-        self.actionOpen_Folder.setText(_translate("MainWindow", "Open Folder"))
+        self.actionOpen_Folder.setText(_translate("MainWindow", "Directory Mode"))
         self.actionOpen_Folder.setShortcut(_translate("MainWindow", "Ctrl+F"))
         self.actionOpen_File.setText(_translate("MainWindow", "Open File"))
         self.actionOpen_File.setShortcut(_translate("MainWindow", "Ctrl+O"))

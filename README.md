@@ -1,12 +1,23 @@
 # GMxLRC
 <img src="icon.png" height="128"><br>
 A simple GUI for MxLRC<br>
-Based on MxLRC v1.2.2
+
+## Song List
+Here's an example<br>
+```text
+The Killers, Mr. Brightside
+Michael Jackson, The Girl Is Mine
+<artist>, <title>
+```
 
 ## Additional Feature
 - Auto-read token from file
 1. Create `token.txt` in the working dir
 2. Paste your user token into `token.txt`
+Example Token File:<Br>
+```text
+12345678ab123a12a1ab1abc1234ab1abcd12ab1234567a12a1abc
+```
 
 ## Requirements
 - Python 3.8+
