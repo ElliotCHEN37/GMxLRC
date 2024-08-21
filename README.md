@@ -9,17 +9,19 @@ Based on MxLRC v1.2.2
 2. Paste your user token into `token.txt`
 
 ## Requirements
-- Python 3.9+
+- Python 3.8+
 - pyqt5
 - mutagen
 
 ## Build
 1. clone this repo
 2. cd to folder
-3. run `pyinstaller build_[ver_you_want].spec` in terminal (replace \[ver_you_want] with version you want)
+3. run `pyinstaller build.spec` in terminal
 
 ## LICENSE
 [The MIT License](LICENSE)
 
 ## Special Thanks
 - [MxLRC](https://github.com/fashni/MxLRC) by [fashni](https://github.com/fashni)
+- PyQt5
+- Mutagen
