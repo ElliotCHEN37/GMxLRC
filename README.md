@@ -3,19 +3,10 @@
 A simple GUI for MxLRC<br>
 Based on MxLRC v1.2.2
 
-## What's the difference between 2 versions in v1.2?
--  STD (Standard)
-This version comes with `mxlrc.exe`
-- GUI (GUI Only)
-This version comes without `mxlrc.exe`, you need to download it and place it in GMxLRC's working directory
-
 ## Additional Feature
 - Auto-read token from file
 1. Create `token.txt` in the working dir
 2. Paste your user token into `token.txt`
-
-- Read Artist and Title from audio file metadata (support multiple files)
-1. Go to Action -> Open File or Action -> Open Folder
 
 ## Requirements
 - Python 3.9+

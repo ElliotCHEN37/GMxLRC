@@ -2,4 +2,7 @@
   <qresource prefix="ico">
     <file>icon.png</file>
   </qresource>
+  <qresource prefix="fnt">
+    <file>JetBrainsMono-Light.ttf</file>
+  </qresource>
 </RCC>

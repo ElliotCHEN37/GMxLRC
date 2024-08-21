@@ -6,69 +6,70 @@ from PyQt5 import QtWidgets, QtGui
 from mutagen import File
 from win import Ui_MainWindow
 
-
 class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(':/ico/icon.png'))
-        self.pushButton.clicked.connect(self.start_process)
 
+        self.fontDB = QtGui.QFontDatabase()
+        self.fontDB.addApplicationFont(":/fnt/JetBrainsMono-Light.ttf")
+        self.info.setFont(QtGui.QFont("JetBrains Mono Light", 7))
+
+        self.pushButton.clicked.connect(self.start_process)
         self.actionExit.triggered.connect(self.close)
-        self.actionOpen_Folder_2.triggered.connect(self.open_folder)
+        self.actionOpen_Folder.triggered.connect(self.open_folder)
         self.actionOpen_File.triggered.connect(self.open_file)
         self.actionAbout.triggered.connect(self.show_about)
         self.actionUpdate.triggered.connect(self.check_for_update)
+        self.actionBd.triggered.connect(self.open_batch_file)
+        self.actionLicense.triggered.connect(self.license_popup)
 
-        if not os.path.exists('./mxlrc.exe'):
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Warning)
-            msg.setWindowTitle("Missing File")
-            msg.setText("The required file 'mxlrc.exe' is not found in the current directory.")
-            msg.setInformativeText(
-                "Please download 'mxlrc.exe' and place it in the same directory as this application.")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msg.exec_()
-            webbrowser.open('https://github.com/fashni/MxLRC/releases/latest')
-            sys.exit()
+        self.check_executable()
 
-        self.token = ""
-
-        if os.path.exists("token.txt"):
-            try:
-                with open("token.txt", "r") as token_file:
-                    self.token = token_file.read().strip()
-            except Exception as e:
-                print(f"Error reading token file: {e}")
+        self.token = self.load_token()
 
         self.Token_in.setText(self.token)
 
-    def start_process(self):
-        self.info.setText("")
-        artist = self.Artist_in.text()
-        title = self.Title_in.text()
-        output_dir = self.Output_in.text()
-        sleep_time = int(self.Sleep_in.text()) if self.Sleep_in.text() else 30
-        max_depth = int(self.Depth_in.text()) if self.Depth_in.text() else 100
-        token_input = self.Token_in.text()
+    def check_executable(self):
+        if not os.path.exists('./mxlrc.exe'):
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Missing File",
+                "The required file 'mxlrc.exe' is not found in the current directory.\n"
+                "Please download 'mxlrc.exe' and place it in the same directory as this application."
+            )
+            webbrowser.open('https://github.com/fashni/MxLRC/releases/latest')
+            sys.exit()
 
-        token = token_input if token_input else self.token
+    def load_token(self):
+        try:
+            with open("token.txt", "r", encoding="utf-8") as token_file:
+                return token_file.read().strip()
+        except Exception as e:
+            print(f"Error reading token file: {e}")
+            return ""
+
+    def start_process(self):
+        artist_input = self.Artist_in.text().strip()
+        title_input = self.Title_in.text().strip()
+        output_dir = self.Output_in.text().strip()
+        sleep_time = int(self.Sleep_in.text() or 30)
+        max_depth = int(self.Depth_in.text() or 100)
+        token = self.Token_in.text().strip() or self.token
 
         if not token:
             if not self.Quiet_chk.isChecked():
                 self.info.append("Token is empty. No action performed.")
             return
 
-        self.download_lrc(artist, title, output_dir, sleep_time, max_depth, token)
+        search_string = (f'"{artist_input},{title_input}"')
+        self.download_lrc(search_string, output_dir, sleep_time, max_depth, token)
 
-    def download_lrc(self, artist, title, output_dir, sleep_time, max_depth, token):
+    def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token):
         args_list = [
-            'mxlrc.exe',
-            '-s', f"{artist},{title}",
-            '-o', output_dir,
-            '-t', str(sleep_time),
-            '-d', str(max_depth),
-            '--token', token
+            'mxlrc.exe', '-s', search_string, '-o', output_dir,
+            '-t', str(sleep_time), '-d', str(max_depth), '--token', token
         ]
 
         if self.Quiet_chk.isChecked():
@@ -79,98 +80,131 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             args_list.append('--bfs')
 
         try:
-            process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            stdout, stderr = process.communicate()
-
-            if not self.Quiet_chk.isChecked():
-                self.info.append(f"[DEBUG] Args: {args_list}")
-                if stdout:
-                    self.info.append(stdout)
-                if stderr:
-                    self.info.append(stderr)
-
-            if process.returncode == 0:
-                self.info.append(f"Downloaded LRC for {artist} - {title}")
-            elif not self.Quiet_chk.isChecked():
-                self.info.append(f"Failed to download LRC for {artist} - {title} with exit code {process.returncode}.")
+            process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+            self.handle_process_output(process)
         except Exception as e:
             if not self.Quiet_chk.isChecked():
-                self.info.append(f"[DEBUG] Args: {args_list}")
-                self.info.append(f"Error occurred: {e}")
+                self.info.append(f"[D] Error occurred: {e}")
+
+    def handle_process_output(self, process):
+        for stdout_line in iter(process.stdout.readline, ''):
+            if stdout_line:
+                self.info.append(f"[I] {stdout_line.strip()}")
+        for stderr_line in iter(process.stderr.readline, ''):
+            if stderr_line:
+                self.info.append(f"{stderr_line.strip()}")
+        process.stdout.close()
+        process.stderr.close()
+        process.wait()
+
+        if process.returncode != 0 and not self.Quiet_chk.isChecked():
+            self.info.append(f"[X] Failed to process with exit code {process.returncode}.")
 
     def open_folder(self):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
         if folder_path:
-            if not self.Quiet_chk.isChecked():
-                self.info.append(f"Selected Folder: {folder_path}")
-            supported_formats = ('.mp3', '.flac', '.wav', '.ogg', '.m4a')
-            audio_files = [f for f in os.listdir(folder_path) if f.lower().endswith(supported_formats)]
+            self.info.append(f"Selected Folder: {folder_path}")
+            audio_files = [f for f in os.listdir(folder_path) if f.lower().endswith(('.mp3', '.flac', '.wav', '.ogg', '.m4a'))]
 
             if not audio_files:
-                if not self.Quiet_chk.isChecked():
-                    self.info.append("No audio files found in the selected folder.")
+                self.info.append("No audio files found in the selected folder.")
                 return
 
-            output_dir = self.Output_in.text()
-            sleep_time = int(self.Sleep_in.text()) if self.Sleep_in.text() else 30
-            max_depth = int(self.Depth_in.text()) if self.Depth_in.text() else 100
-            token = self.Token_in.text() or self.token
+            output_dir = self.Output_in.text().strip()
+            sleep_time = int(self.Sleep_in.text() or 30)
+            max_depth = int(self.Depth_in.text() or 100)
+            token = self.Token_in.text().strip() or self.token
 
             if not token:
-                if not self.Quiet_chk.isChecked():
-                    self.info.append("Token is empty. No action performed.")
+                self.info.append("Token is empty. No action performed.")
                 return
 
             for audio_file in audio_files:
                 file_path = os.path.join(folder_path, audio_file)
-                try:
-                    audio = File(file_path)
-                    artist = audio.get('ARTIST', ['Unknown Artist'])[0]
-                    title = audio.get('TITLE', [os.path.splitext(audio_file)[0]])[0]
-                    if not self.Quiet_chk.isChecked():
-                        self.info.append(f"Processing file: {audio_file} (Artist: {artist}, Title: {title})")
-                    self.download_lrc(artist, title, output_dir, sleep_time, max_depth, token)
-                except Exception as e:
-                    if not self.Quiet_chk.isChecked():
-                        self.info.append(f"Failed to process file {audio_file}: {e}")
+                self.process_audio_file(file_path, output_dir, sleep_time, max_depth, token)
+
+    def process_audio_file(self, file_path, output_dir, sleep_time, max_depth, token):
+        try:
+            audio = File(file_path)
+            artist = audio.get('ARTIST', ['Unknown Artist'])[0]
+            title = audio.get('TITLE', [os.path.splitext(os.path.basename(file_path))[0]])[0]
+            self.info.append(f"Processing file: {file_path} (Artist: {artist}, Title: {title})")
+            self.download_lrc(f'"{artist},{title}"', output_dir, sleep_time, max_depth, token)
+        except Exception as e:
+            self.info.append(f"Failed to process file {file_path}: {e}")
 
     def open_file(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "",
-                                                             "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
         if file_path:
-            if not self.Quiet_chk.isChecked():
-                self.info.append(f"Selected File: {file_path}")
-            self.info.setText("")
+            self.info.append(f"Selected File: {file_path}")
             try:
                 audio_file = File(file_path)
-                if audio_file:
-                    artist = audio_file.get('ARTIST', [''])[0]
-                    title = audio_file.get('TITLE', [''])[0]
-                    self.Artist_in.setText(artist)
-                    self.Title_in.setText(title)
-                    if not self.Quiet_chk.isChecked():
-                        self.info.append(f"Loaded metadata - Artist: {artist}, Title: {title}")
-                else:
-                    if not self.Quiet_chk.isChecked():
-                        self.info.append("No metadata found in the file.")
+                artist = audio_file.get('ARTIST', [''])[0]
+                title = audio_file.get('TITLE', [''])[0]
+                self.Artist_in.setText(artist)
+                self.Title_in.setText(title)
+                self.info.append(f"Loaded metadata - Artist: {artist}, Title: {title}")
             except Exception as e:
-                if not self.Quiet_chk.isChecked():
-                    self.info.append(f"Failed to load metadata: {e}")
+                self.info.append(f"Failed to load metadata: {e}")
+
+    def open_batch_file(self):
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Batch File", "", "Text Files (*.txt)")
+        if file_path:
+            self.info.append(f"Selected Batch File: {file_path}")
+            try:
+                with open(file_path, "r", encoding="utf-8") as batch_file:
+                    lines = batch_file.readlines()
+                    output_dir = self.Output_in.text().strip()
+                    sleep_time = int(self.Sleep_in.text() or 30)
+                    max_depth = int(self.Depth_in.text() or 100)
+                    token = self.Token_in.text().strip() or self.token
+
+                    if not token:
+                        self.info.append("Token is empty. No action performed.")
+                        return
+
+                    for line in lines:
+                        artist, title = [s.strip() for s in line.split(',')]
+                        self.download_lrc(f'"{artist},{title}"', output_dir, sleep_time, max_depth, token)
+                        self.info.append(f"Processing batch item: {artist} - {title}")
+            except Exception as e:
+                self.info.append(f"Failed to process batch file: {e}")
 
     def show_about(self):
-        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.3 by ElliotCHEN37\nMxLRC v1.2.2 by fashni\n"
-                                                   "Licensed under MIT License")
+        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.3 by ElliotCHEN37\nMxLRC v1.2.2 by fashni\nLicensed under MIT License")
 
     def check_for_update(self):
         webbrowser.open('https://github.com/ElliotCHEN37/GMxLRC/releases/latest')
 
+    def license_popup(self):
+        QtWidgets.QMessageBox.information(self, "License", "This program (GMxLRC) was licensed under MIT License\n\n"
+                                        "MIT License\n"
+                                        "Copyright (c) 2024 Elliot\n\n"
+                                        "Permission is hereby granted, free of charge, to any person obtaining a copy "
+                                        'of this software and associated documentation files (the "Software"), to deal '
+                                        "in the Software without restriction, including without limitation the rights "
+                                        "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell "
+                                        "copies of the Software, and to permit persons to whom the Software is "
+                                        "furnished to do so, subject to the following conditions:\n\n"
+                                        "1. The original author and the authors of any other software used with this "
+                                        "software must be credited\n\n"
+                                        "The above copyright notice and this permission notice shall be included in all "
+                                        "copies or substantial portions of the Software.\n\n"
+                                        'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR '
+                                        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+                                        "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+                                        "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+                                        "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+                                        "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE "
+                                        "SOFTWARE.\n\n"
+                                        "JetBrains Mono Light font was licensed under SIL Open Font License 1.1\n\n"
+                                        "PyQt5 was licensed under GPL v3 License")
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainApp()
     main_window.show()
     sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
     main()
