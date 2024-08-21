@@ -32,7 +32,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.process = QtCore.QProcess(self)
         self.process.readyReadStandardOutput.connect(self.handle_stdout)
-        self.process.readyReadStandardError.connect(self.handle_stderr)
+        self.process.readyReadStandardError.connect(self.handle_stdo)
         self.process.finished.connect(self.process_finished)
 
     def check_executable(self):
@@ -55,8 +55,8 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return ""
 
     def start_process(self):
-        artist_input = self.Artist_in.text().strip()
-        title_input = self.Title_in.text().strip()
+        artist = self.Artist_in.text().strip()
+        title = self.Title_in.text().strip()
         output_dir = self.Output_in.text().strip()
         sleep_time = int(self.Sleep_in.text())
         max_depth = int(self.Depth_in.text())
@@ -67,19 +67,15 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.info.append("Token is empty. No action performed.")
             return
 
-        search_string = f'"{artist_input},{title_input}"'
+        search_string = f'"{artist},{title}"'
         self.download_lrc(search_string, output_dir, sleep_time, max_depth, token)
 
-    def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token, directory_mode=False):
-        args_list = [
-            '-s', search_string, '--token', token
-        ]
-
+    def build_args_list(self, search_string, output_dir, sleep_time, max_depth, token, directory_mode=False):
+        args_list = ['-s', search_string, '--token', token]
         if directory_mode:
-            args_list = ['-s', search_string, '-t', str(sleep_time), '-d', str(max_depth), '--token', token]
+            args_list += ['-t', str(sleep_time), '-d', str(max_depth)]
         else:
-            args_list.append('-o')
-            args_list.append(output_dir)
+            args_list += ['-o', output_dir]
 
         if self.Quiet_chk.isChecked():
             args_list.append('-q')
@@ -88,82 +84,70 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.bfs_chk.isChecked():
             args_list.append('--bfs')
 
-        self.info.append(f"[D] Arguments: {str(args_list)}")
+        return args_list
 
+    def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token, directory_mode=False):
+        args_list = self.build_args_list(search_string, output_dir, sleep_time, max_depth, token, directory_mode)
+        self.info.append(f"[D] Arguments: {args_list}")
         self.process.start('mxlrc.exe', args_list)
 
     def handle_stdout(self):
-        output = self.process.readAllStandardOutput().data().decode()
-        self.info.append(f"[I] {output.strip()}")
+        output = self.process.readAllStandardOutput().data().decode().strip()
+        if output:
+            self.info.append(f"[I] {output}")
 
-    def handle_stderr(self):
-        error = self.process.readAllStandardError().data().decode()
-        self.info.append(f"[E] {error.strip()}")
+    def handle_stdo(self):
+        stdo = self.process.readAllStandardError().data().decode().strip()
+        if stdo:
+            self.info.append(f"{stdo}")
 
     def process_finished(self):
         if self.process.exitCode() != 0 and not self.Quiet_chk.isChecked():
             self.info.append(f"[X] Failed to process with exit code {self.process.exitCode()}.")
 
-    def handle_process_output(self, process):
-        for stdout_line in iter(process.stdout.readline, ''):
-            if stdout_line:
-                self.info.append(f"[I] {stdout_line.strip()}")
-        for stderr_line in iter(process.stderr.readline, ''):
-            if stderr_line:
-                self.info.append(f"{stderr_line.strip()}")
-        process.stdout.close()
-        process.stderr.close()
-        process.wait()
-
-        if process.returncode != 0 and not self.Quiet_chk.isChecked():
-            self.info.append(f"[X] Failed to process with exit code {process.returncode}.")
-
     def open_folder(self):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
         if folder_path:
-            self.info.append(f"Selected Folder: {folder_path}")
+            self.info.append(f"[I] Selected Folder: {folder_path}")
 
             sleep_time = int(self.Sleep_in.text())
             max_depth = int(self.Depth_in.text())
             token = self.Token_in.text().strip() or self.token
 
             if not token:
-                self.info.append("Token is empty. No action performed.")
+                self.info.append("[I] Token is empty. No action performed.")
                 return
 
-            search_string = folder_path
-
-            self.download_lrc(search_string, "", sleep_time, max_depth, token, directory_mode=True)
+            self.download_lrc(folder_path, "", sleep_time, max_depth, token, directory_mode=True)
 
     def process_audio_file(self, file_path, output_dir, sleep_time, max_depth, token):
         try:
             audio = File(file_path)
             artist = audio.get('ARTIST', ['Unknown Artist'])[0]
             title = audio.get('TITLE', [os.path.splitext(os.path.basename(file_path))[0]])[0]
-            self.info.append(f"Processing file: {file_path} (Artist: {artist}, Title: {title})")
+            self.info.append(f"[I] Processing file: {file_path} (Artist: {artist}, Title: {title})")
             self.download_lrc(f'"{artist},{title}"', output_dir, sleep_time, max_depth, token)
         except Exception as e:
-            self.info.append(f"Failed to process file {file_path}: {e}")
+            self.info.append(f"[E] Failed to process file {file_path}: {e}")
 
     def open_file(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "",
-                                                             "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
         if file_path:
-            self.info.append(f"Selected File: {file_path}")
+            self.info.append(f"[I] Selected File: {file_path}")
             try:
                 audio_file = File(file_path)
                 artist = audio_file.get('ARTIST', [''])[0]
                 title = audio_file.get('TITLE', [''])[0]
                 self.Artist_in.setText(artist)
                 self.Title_in.setText(title)
-                self.info.append(f"Loaded metadata - Artist: {artist}, Title: {title}")
+                self.info.append(f"[I] Loaded metadata - Artist: {artist}, Title: {title}")
             except Exception as e:
-                self.info.append(f"Failed to load metadata: {e}")
+                self.info.append(f"[E] Failed to load metadata: {e}")
 
     def open_batch_file(self):
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Song List", "", "Text Files (*.txt)")
         if file_path:
-            self.info.append(f"Selected Song List: {file_path}")
+            self.info.append(f"[I] Selected Song List: {file_path}")
             try:
                 with open(file_path, "r", encoding="utf-8") as batch_file:
                     lines = batch_file.readlines()
@@ -173,19 +157,18 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     token = self.Token_in.text().strip() or self.token
 
                     if not token:
-                        self.info.append("Token is empty. No action performed.")
+                        self.info.append("[I] Token is empty. No action performed.")
                         return
 
                     for line in lines:
                         artist, title = [s.strip() for s in line.split(',')]
                         self.download_lrc(f'"{artist},{title}"', output_dir, sleep_time, max_depth, token)
-                        self.info.append(f"Processing: {artist} - {title}")
+                        self.info.append(f"[I] Processing: {artist} - {title}")
             except Exception as e:
-                self.info.append(f"Failed to process: {e}")
+                self.info.append(f"[E] Failed to process: {e}")
 
     def show_about(self):
-        QtWidgets.QMessageBox.about(self, "About",
-                                    "GMxLRC v1.4 by ElliotCHEN37\nLicensed under MIT License")
+        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.4 by ElliotCHEN37\nLicensed under MIT License")
 
     def check_for_update(self):
         webbrowser.open('https://github.com/ElliotCHEN37/GMxLRC/releases/latest')
