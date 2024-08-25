@@ -1,8 +1,9 @@
 import webbrowser
 import sys
 import os
+import subprocess
 from PyQt5 import QtWidgets, QtGui, QtCore
-from mutagen import File
+from tinytag import TinyTag
 from win import Ui_MainWindow
 
 
@@ -21,7 +22,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionOpen_Folder.triggered.connect(self.open_folder)
         self.actionOpen_File.triggered.connect(self.open_file)
         self.actionAbout.triggered.connect(self.show_about)
-        self.actionUpdate.triggered.connect(self.check_for_update)
+        self.actionUpdate.triggered.connect(self.cfu)
         self.actionBd.triggered.connect(self.open_batch_file)
         self.actionLicense.triggered.connect(self.license_popup)
 
@@ -29,11 +30,6 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.token = self.load_token()
         self.Token_in.setText(self.token)
-
-        self.process = QtCore.QProcess(self)
-        self.process.readyReadStandardOutput.connect(self.handle_stdout)
-        self.process.readyReadStandardError.connect(self.handle_stdo)
-        self.process.finished.connect(self.process_finished)
 
     def check_executable(self):
         if not os.path.exists('mxlrc.exe'):
@@ -51,7 +47,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             with open("token.txt", "r", encoding="utf-8") as token_file:
                 return token_file.read().strip()
         except Exception as e:
-            print(f"Error reading token file: {e}")
+            self.info.append(f"[E] Error reading token file: {e}")
             return ""
 
     def start_process(self):
@@ -89,21 +85,29 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def download_lrc(self, search_string, output_dir, sleep_time, max_depth, token, directory_mode=False):
         args_list = self.build_args_list(search_string, output_dir, sleep_time, max_depth, token, directory_mode)
         self.info.append(f"[D] Arguments: {args_list}")
-        self.process.start('mxlrc.exe', args_list)
 
-    def handle_stdout(self):
-        output = self.process.readAllStandardOutput().data().decode().strip()
-        if output:
-            self.info.append(f"[I] {output}")
+        try:
+            process = subprocess.Popen(
+                ['mxlrc.exe'] + args_list,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding='utf-8',
+                errors='replace'
+            )
+            stdout, stderr = process.communicate()
 
-    def handle_stdo(self):
-        stdo = self.process.readAllStandardError().data().decode().strip()
-        if stdo:
-            self.info.append(f"{stdo}")
+            if stdout:
+                self.info.append(f"[I] {stdout.strip()}")
+            if stderr:
+                self.info.append(f"{stderr.strip()}")
 
-    def process_finished(self):
-        if self.process.exitCode() != 0 and not self.Quiet_chk.isChecked():
-            self.info.append(f"[X] Failed to process with exit code {self.process.exitCode()}.")
+            if process.returncode != 0:
+                self.info.append(f"[X] Failed to process with exit code {process.returncode}.")
+            else:
+                self.info.append("[I] Process completed successfully.")
+        except Exception as e:
+            self.info.append(f"[E] Failed to start process: {e}")
 
     def open_folder(self):
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Open Folder", "")
@@ -122,22 +126,23 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def process_audio_file(self, file_path, output_dir, sleep_time, max_depth, token):
         try:
-            audio = File(file_path)
-            artist = audio.get('ARTIST', ['Unknown Artist'])[0]
-            title = audio.get('TITLE', [os.path.splitext(os.path.basename(file_path))[0]])[0]
+            audio = TinyTag.get(file_path)
+            artist = audio.artist or 'Unknown Artist'
+            title = audio.title or os.path.splitext(os.path.basename(file_path))[0]
             self.info.append(f"[I] Processing file: {file_path} (Artist: {artist}, Title: {title})")
             self.download_lrc(f'"{artist},{title}"', output_dir, sleep_time, max_depth, token)
         except Exception as e:
             self.info.append(f"[E] Failed to process file {file_path}: {e}")
 
     def open_file(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "",
+                                                             "Audio Files (*.mp3 *.flac *.wav *.ogg *.m4a)")
         if file_path:
             self.info.append(f"[I] Selected File: {file_path}")
             try:
-                audio_file = File(file_path)
-                artist = audio_file.get('ARTIST', [''])[0]
-                title = audio_file.get('TITLE', [''])[0]
+                audio_file = TinyTag.get(file_path)
+                artist = audio_file.artist or ''
+                title = audio_file.title or ''
                 self.Artist_in.setText(artist)
                 self.Title_in.setText(title)
                 self.info.append(f"[I] Loaded metadata - Artist: {artist}, Title: {title}")
@@ -168,43 +173,26 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.info.append(f"[E] Failed to process: {e}")
 
     def show_about(self):
-        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.4 by ElliotCHEN37\nLicensed under MIT License")
+        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.4.1 by ElliotCHEN37\nLicensed under MIT License")
 
-    def check_for_update(self):
+    def cfu(self):
         webbrowser.open('https://github.com/ElliotCHEN37/GMxLRC/releases/latest')
 
     def license_popup(self):
-        QtWidgets.QMessageBox.information(self, "License", "This program (GMxLRC) was licensed under MIT License\n\n"
-                                                           "MIT License\n"
-                                                           "Copyright (c) 2024 Elliot\n\n"
-                                                           "Permission is hereby granted, free of charge, to any person obtaining a copy "
-                                                           'of this software and associated documentation files (the "Software"), to deal '
-                                                           "in the Software without restriction, including without limitation the rights "
-                                                           "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell "
-                                                           "copies of the Software, and to permit persons to whom the Software is "
-                                                           "furnished to do so, subject to the following conditions:\n\n"
-                                                           "1. The original author and the authors of any other software used with this "
-                                                           "software must be credited\n\n"
-                                                           "The above copyright notice and this permission notice shall be included in all "
-                                                           "copies or substantial portions of the Software.\n\n"
-                                                           'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR '
-                                                           "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
-                                                           "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
-                                                           "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
-                                                           "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
-                                                           "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE "
-                                                           "SOFTWARE.\n\n"
-                                                           "JetBrains Mono Light font was licensed under SIL Open Font License 1.1\n\n"
-                                                           "PyQt5 was licensed under GPL v3 License\n\n"
-                                                           "mutagen was licensed under GPL v2 or later")
+        try:
+            license_file = QtCore.QFile(":/lnc/LICENSE")
+            if license_file.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
+                license_text = QtCore.QTextStream(license_file).readAll()
+                license_file.close()
+                QtWidgets.QMessageBox.information(self, "License", license_text)
+            else:
+                raise Exception("Unable to open resource file.")
+        except Exception as e:
+            self.info.append(f"[E] Failed to load license file: {e}")
 
 
-def main():
+if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainApp()
     main_window.show()
     sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    main()
