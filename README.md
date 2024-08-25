@@ -1,3 +1,6 @@
+# Continuation of GMxLRC
+I'm trying to make a new tool using py, which will come with the same functions as GMxLRC, but without MxLRC needed.
+
 # GMxLRC
 <img src="icon.png" height="128"><br>
 A simple GUI for MxLRC<br>
