@@ -22,7 +22,7 @@ Example Token File:<Br>
 ## Requirements
 - Python 3.8+
 - pyqt5
-- mutagen
+- tinytag
 
 ## Build
 1. clone this repo
