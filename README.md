@@ -1,6 +1,6 @@
 # GMxLRC
 <img src="icon.png" height="128"><br>
-A simple GUI for MxLRC<br>
+A simple GUI for [MxLRC](https://github.com/fashni/MxLRC) by [fashni](https://github.com/fashni)
 
 ## Song List
 Here's an example<br>
@@ -31,8 +31,3 @@ Example Token File:<Br>
 
 ## LICENSE
 [The MIT License](LICENSE)
-
-## Special Thanks
-- [MxLRC](https://github.com/fashni/MxLRC) by [fashni](https://github.com/fashni)
-- PyQt5
-- Mutagen
