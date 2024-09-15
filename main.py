@@ -10,7 +10,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.config = load_config()
-        self.is_dark_mode = self.config.get("darkmode", "0") == "1"  # Read dark mode setting
+        self.is_dark_mode = self.config.get("darkmode", "0") == "1"
 
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(':/ico/icon.png'))
@@ -20,7 +20,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.info.setFont(QtGui.QFont("JetBrains Mono Light", 7))
 
         apply_config(self.config, self)
-        self.apply_stylesheet()  # Apply the stylesheet based on the current mode
+        self.apply_stylesheet()
 
         self.setup_connections()
         check_executable('mxlrc.exe')
@@ -29,7 +29,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.is_dark_mode:
             self.setStyleSheet(dark_mode_stylesheet)
         else:
-            self.setStyleSheet("")  # Reset to default stylesheet
+            self.setStyleSheet("")
 
     def setup_connections(self):
         self.pushButton.clicked.connect(self.start_process)
@@ -100,19 +100,16 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def toggle_dark_mode(self):
         self.is_dark_mode = toggle_dark_mode(self, self, self.is_dark_mode)
-        self.apply_stylesheet()  # Apply the stylesheet based on the new mode
-        self.restart_app()  # Restart the app to apply platform changes
+        self.apply_stylesheet()
+        self.restart_app()
 
     def restart_app(self):
-        # Save the current state to a config file or environment variable
         self.config["darkmode"] = "1" if self.is_dark_mode else "0"
         with open("config.json", "w", encoding="utf-8") as file:
             json.dump(self.config, file, indent=4, ensure_ascii=False)
 
-        # Close the current application
         QtWidgets.QApplication.quit()
 
-        # Relaunch the application
         new_args = sys.argv + [f'-platform', f'windows:darkmode={int(self.is_dark_mode)}']
         QtCore.QProcess.startDetached(sys.executable, new_args)
 
@@ -123,7 +120,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.info.append(f"[E] {message}")
 
 if __name__ == "__main__":
-    darknum = int(load_config().get("darkmode", "0"))  # Read dark mode config
+    darknum = int(load_config().get("darkmode", "0"))
     app = QtWidgets.QApplication(sys.argv + [f'-platform', f'windows:darkmode={darknum}'])
     main_window = MainApp()
     main_window.show()

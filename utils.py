@@ -24,7 +24,7 @@ QPushButton:hover {
 }
 
 QMenuBar {
-    background-color: #2b2b2b;
+    background-color: #3c3c3c;
     color: #ffffff;
 }
 
@@ -69,10 +69,10 @@ CONFIG_FILE = "config.json"
 def toggle_dark_mode(app, main_window, is_dark_mode):
     if is_dark_mode:
         app.setStyleSheet("")
-        main_window.log_info("Switched to light mode.")
+        main_window.log_info("Theme switched.")
     else:
         app.setStyleSheet(dark_mode_stylesheet)
-        main_window.log_info("Switched to dark mode.")
+        main_window.log_info("Theme switched.")
     return not is_dark_mode
 
 def check_executable(file_name):
@@ -131,7 +131,6 @@ def apply_config(config, main_window):
     main_window.Depth_in.setText(str(max_depth))
     main_window.Output_in.setText(output_dir)
 
-    # Apply dark mode if configured
     if dark_mode:
         toggle_dark_mode(main_window, main_window, dark_mode)
         main_window.is_dark_mode = True
