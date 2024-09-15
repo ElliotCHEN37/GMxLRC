@@ -42,8 +42,11 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionLicense.triggered.connect(self.license_popup)
         self.actionChangelog.triggered.connect(self.show_changelog)
         self.actionDarkT.triggered.connect(self.toggle_dark_mode)
+        self.actionSaveConfig.triggered.connect(self.update_config)
 
     def start_process(self):
+        self.update_config()
+
         artist, title, output_dir = self.get_inputs()
         sleep_time, max_depth, token = self.get_processing_params()
 
@@ -77,7 +80,7 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         process_batch_file(self, file_path)
 
     def show_about(self):
-        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.5 by ElliotCHEN37\nLicensed under MIT License")
+        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.6 by ElliotCHEN37\nLicensed under MIT License")
 
     @staticmethod
     def cfu():
@@ -96,11 +99,12 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.log_error(f"Failed to load license file: {e}")
 
     def show_changelog(self):
-        QtWidgets.QMessageBox.information(self, "Changelog", "v1.5\n-Separate different parts from main.py")
+        QtWidgets.QMessageBox.information(self, "Changelog", "v1.6\n-Fix Some BUGs\n-Add dark theme support\n-Add config support")
 
     def toggle_dark_mode(self):
         self.is_dark_mode = toggle_dark_mode(self, self, self.is_dark_mode)
         self.apply_stylesheet()
+        self.update_config()
         self.restart_app()
 
     def restart_app(self):
@@ -118,6 +122,20 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def log_error(self, message):
         self.info.append(f"[E] {message}")
+
+    def update_config(self):
+        self.config["token"] = self.Token_in.text().strip()
+        self.config["darkmode"] = "1" if self.is_dark_mode else "0"
+        self.config["quiet"] = "1" if self.Quiet_chk.isChecked() else "0"
+        self.config["update"] = "1" if self.Update_chk.isChecked() else "0"
+        self.config["bfs"] = "1" if self.bfs_chk.isChecked() else "0"
+        self.config["sleep"] = self.Sleep_in.text().strip()
+        self.config["depth"] = self.Depth_in.text().strip()
+        self.config["output"] = self.Output_in.text().strip()
+
+        with open("config.json", "w", encoding="utf-8") as file:
+            json.dump(self.config, file, indent=4, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     darknum = int(load_config().get("darkmode", "0"))

@@ -10,13 +10,20 @@ Michael Jackson, The Girl Is Mine
 <artist>, <title>
 ```
 
-## Additional Feature
-- Auto-read token from file
-1. Create `token.txt` in the working dir
-2. Paste your user token into `token.txt`
-Example Token File:<Br>
-```text
-12345678ab123a12a1ab1abc1234ab1abcd12ab1234567a12a1abc
+## Config File
+- Auto-Generate/Read settings from `config.json`<Br>
+Example Config File:<Br>
+```json
+{
+    "token": "",
+    "darkmode": "1",
+    "quiet": "0",
+    "update": "0",
+    "bfs": "0",
+    "sleep": "30",
+    "depth": "100",
+    "output": "lyrics"
+}
 ```
 
 ## Requirements

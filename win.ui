@@ -281,6 +281,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionOpen_Folder"/>
     <addaction name="actionBd"/>
     <addaction name="actionOpen_File"/>
+    <addaction name="actionSaveConfig"/>
     <addaction name="actionDarkT"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
@@ -371,6 +372,14 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionSaveConfig">
+   <property name="text">
+    <string>Save Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>
