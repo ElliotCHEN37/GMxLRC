@@ -17,6 +17,8 @@ QLabel, QLineEdit, QTextEdit {
 QPushButton {
     background-color: #555555;
     color: #ffffff;
+    border-radius: 5px;
+    padding: 5;
 }
 
 QPushButton:hover {
