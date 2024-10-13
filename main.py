@@ -92,7 +92,8 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def show_changelog(self):
         self.info.append("Changelog\n\nv1.6.1\n-Fix shwoing the wrong version number"
-                                    "\n-Rewrite some codes\n-Add a pop-up when user trying to change the theme color")
+                                    "\n-Rewrite some codes\n-Add a pop-up when user trying to change the theme color\n"
+                         "-Changelogs, About and License pop-up were removed, now using info windows instead")
 
     @staticmethod
     def cfu():
