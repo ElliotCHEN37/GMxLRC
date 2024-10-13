@@ -190,8 +190,7 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'JetBrains Mono Light\',\'Arial\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono 54\',\'JetBrains Mono Light\'; font-size:7pt;\">GMxLRC v1.5 by ElliotCHEN37</span></p>\n"
-"<p style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono 54\',\'JetBrains Mono Light\'; font-size:7pt;\">* Means REQUIRED</span></p>\n"
+"<p style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono 54\',\'JetBrains Mono Light\'; font-size:7pt;\">GMxLRC v1.6.1 by ElliotCHEN37</span></p>\n"
 "<p style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono 54\',\'JetBrains Mono Light\'; font-size:7pt;\">&gt;&gt;Output Window</span></p></body></html>"))
         self.Output_in.setText(_translate("MainWindow", "lyrics"))
         self.Output_in.setPlaceholderText(_translate("MainWindow", "Output directory, default: lyrics"))

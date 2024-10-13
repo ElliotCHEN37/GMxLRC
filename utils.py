@@ -2,78 +2,17 @@ import os
 import webbrowser
 import sys
 import json
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
-dark_mode_stylesheet = """
-QMainWindow {
-    background-color: #2b2b2b;
-}
-
-QLabel, QLineEdit, QTextEdit {
-    color: #ffffff;
-    background-color: #2b2b2b;
-}
-
-QPushButton {
-    background-color: #555555;
-    color: #ffffff;
-    border-radius: 5px;
-    padding: 5;
-}
-
-QPushButton:hover {
-    background-color: #777777;
-}
-
-QMenuBar {
-    background-color: #3c3c3c;
-    color: #ffffff;
-}
-
-QMenuBar::item:selected {
-    background-color: #555555;
-}
-
-QMenu {
-    background-color: #2b2b2b;
-    color: #ffffff;
-}
-
-QMenu::item:selected {
-    background-color: #555555;
-}
-
-QMessageBox {
-    background-color: #2b2b2b;
-    color: #ffffff;
-}
-
-QCheckBox {
-    color: #ffffff;
-    background-color: #2b2b2b;
-    padding: 2px;
-}
-"""
-
-DEFAULT_CONFIG = {
-    "token": "",
-    "darkmode": "0",
-    "quiet": "0",
-    "update": "0",
-    "bfs": "0",
-    "sleep": "30",
-    "depth": "100",
-    "output": "lyrics"
-}
-
-CONFIG_FILE = "config.json"
+configfile_resource = ":/rsc/config.json"
+configfile_local = "config.json"
 
 def toggle_dark_mode(app, main_window, is_dark_mode):
     if is_dark_mode:
         app.setStyleSheet("")
         main_window.log_info("Theme switched.")
     else:
-        app.setStyleSheet(dark_mode_stylesheet)
+        app.setStyleSheet(configfile_resource)
         main_window.log_info("Theme switched.")
     return not is_dark_mode
 
@@ -104,17 +43,17 @@ def build_args_list(search_string, output_dir, sleep_time, max_depth, token, qui
     return args_list
 
 def load_config():
-    if not os.path.exists(CONFIG_FILE):
+    if not os.path.exists(configfile_local):
         create_default_config()
 
-    with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+    with open(configfile_local, "r", encoding="utf-8") as file:
         config = json.load(file)
 
     return config
 
 def create_default_config():
-    with open(CONFIG_FILE, "w", encoding="utf-8") as file:
-        json.dump(DEFAULT_CONFIG, file, indent=4, ensure_ascii=False)
+    with open(configfile_resource, "w", encoding="utf-8") as file:
+        json.dump(configfile_resource, file, indent=4, ensure_ascii=False)
 
 def apply_config(config, main_window):
     main_window.Token_in.setText(config.get("token", ""))
