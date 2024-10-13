@@ -88,7 +88,11 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         process_batch_file(self, file_path)
 
     def show_about(self):
-        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.6 by ElliotCHEN37\nLicensed under MIT License")
+        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.6.1 by ElliotCHEN37\nLicensed under MIT License")
+
+    def show_changelog(self):
+        QtWidgets.QMessageBox.information(self, "Changelog", "v1.6.1\n-Fix shwoing the wrong version number"
+                                    "\n-Rewrite some codes\n-Add a pop-up when user trying to change the theme color")
 
     @staticmethod
     def cfu():
@@ -98,15 +102,12 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             license_file = QtCore.QFile(":/lnc/LICENSE")
             if license_file.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
-                license_text = license_file.readAll()
-                QtWidgets.QMessageBox.information(self, "License", license_text)
+                license_text = license_file.readAll().data().decode('utf-8')
+                self.info.append(license_text)
             else:
                 self.log_error("Unable to open resource file.")
         except Exception as e:
             self.log_error(f"Failed to load license file: {e}")
-
-    def show_changelog(self):
-        QtWidgets.QMessageBox.information(self, "Changelog", "v1.6\n-Fix Some BUGs\n-Add dark theme support\n-Add config support")
 
     def toggle_dark_mode(self):
         self.is_dark_mode = toggle_dark_mode(self, self, self.is_dark_mode)
