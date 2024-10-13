@@ -4,16 +4,27 @@ import sys
 import json
 from PyQt5 import QtWidgets, QtCore
 
-configfile_resource = ":/rsc/config.json"
+configfile_resource = QtCore.QFile(":/rsc/config.json")
 configfile_local = "config.json"
 
 def toggle_dark_mode(app, main_window, is_dark_mode):
-    if is_dark_mode:
-        app.setStyleSheet("")
-        main_window.log_info("Theme switched.")
-    else:
-        app.setStyleSheet(configfile_resource)
-        main_window.log_info("Theme switched.")
+    try:
+        if is_dark_mode:
+            app.setStyleSheet("")
+            main_window.log_info("Theme switched to light mode.")
+        else:
+            qss_file = QtCore.QFile(":/rsc/stylesheet.qss")
+            if qss_file.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
+                stream = QtCore.QTextStream(qss_file)
+                qss = stream.readAll()
+                app.setStyleSheet(qss)
+                main_window.log_info("Theme switched to dark mode.")
+            else:
+                main_window.log_error("Failed to load stylesheet.qss")
+                return is_dark_mode
+    except Exception as e:
+        main_window.log_error(f"Error while toggling theme: {e}")
+
     return not is_dark_mode
 
 def check_executable(file_name):
@@ -44,16 +55,22 @@ def build_args_list(search_string, output_dir, sleep_time, max_depth, token, qui
 
 def load_config():
     if not os.path.exists(configfile_local):
-        create_default_config()
+        extract_resource_config(configfile_local)
 
     with open(configfile_local, "r", encoding="utf-8") as file:
-        config = json.load(file)
+        return json.load(file)
 
-    return config
 
-def create_default_config():
-    with open(configfile_resource, "w", encoding="utf-8") as file:
-        json.dump(configfile_resource, file, indent=4, ensure_ascii=False)
+def extract_resource_config(destination):
+    config_resource = QtCore.QFile(":/rsc/config.json")
+    if config_resource.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
+        config_data = config_resource.readAll().data().decode('utf-8')
+        config_resource.close()
+
+        with open(destination, "w", encoding="utf-8") as file:
+            file.write(config_data)
+    else:
+        raise Exception("Unable to open config.json from resources.")
 
 def apply_config(config, main_window):
     main_window.Token_in.setText(config.get("token", ""))

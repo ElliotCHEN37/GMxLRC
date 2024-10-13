@@ -88,10 +88,10 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
         process_batch_file(self, file_path)
 
     def show_about(self):
-        QtWidgets.QMessageBox.about(self, "About", "GMxLRC v1.6.1 by ElliotCHEN37\nLicensed under MIT License")
+        self.info.append("About\n\nGMxLRC v1.6.1 by ElliotCHEN37\nLicensed under MIT License")
 
     def show_changelog(self):
-        QtWidgets.QMessageBox.information(self, "Changelog", "v1.6.1\n-Fix shwoing the wrong version number"
+        self.info.append("Changelog\n\nv1.6.1\n-Fix shwoing the wrong version number"
                                     "\n-Rewrite some codes\n-Add a pop-up when user trying to change the theme color")
 
     @staticmethod
@@ -158,7 +158,8 @@ class MainApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
-    darknum = int(load_config().get("darkmode", "0"))
+    config = load_config()
+    darknum = int(config.get("darkmode", "0"))
     app = QtWidgets.QApplication(sys.argv + [f'-platform', f'windows:darkmode={darknum}'])
     main_window = MainApp()
     main_window.show()
