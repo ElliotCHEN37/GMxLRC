@@ -1,3 +1,6 @@
+# No More Updates
+There're many BUGs in the latest version, but I'm not going to fix them. I'll completely re-write this project someday. 
+
 # GMxLRC
 <img src="icon.png" height="128"><br>
 A simple GUI for [MxLRC](https://github.com/fashni/MxLRC) by [fashni](https://github.com/fashni)
